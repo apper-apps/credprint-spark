@@ -1,0 +1,40 @@
+[
+  {
+    "Id": 1,
+    "name": "Administrator",
+    "permissions": ["*"],
+    "description": "Full system access with all permissions",
+    "color": "#ef4444",
+    "createdAt": "2024-01-01T00:00:00Z",
+    "createdBy": 1
+  },
+  {
+    "Id": 2,
+    "name": "Event Manager",
+    "permissions": [
+      "events:read",
+      "events:write",
+      "attendees:read", 
+      "attendees:write",
+      "templates:read",
+      "templates:write"
+    ],
+    "description": "Manage events, attendees, and templates",
+    "color": "#3b82f6",
+    "createdAt": "2024-01-01T00:00:00Z",
+    "createdBy": 1
+  },
+  {
+    "Id": 3,
+    "name": "Viewer",
+    "permissions": [
+      "events:read",
+      "attendees:read",
+      "templates:read"
+    ],
+    "description": "View-only access to events and attendees",
+    "color": "#10b981",
+    "createdAt": "2024-01-01T00:00:00Z",
+    "createdBy": 1
+  }
+]

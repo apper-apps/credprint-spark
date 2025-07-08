@@ -1,8 +1,9 @@
 import mockAttendees from '@/services/mockData/attendees.json';
 
 const attendeeService = {
-  getAll: async () => {
+  getAll: async (userId = null) => {
     await new Promise(resolve => setTimeout(resolve, 200));
+    // In a real app, this would check user permissions
     return [...mockAttendees];
   },
 
@@ -20,23 +21,31 @@ const attendeeService = {
     return mockAttendees.filter(a => a.eventId === eventId);
   },
 
-  create: async (attendeeData) => {
+create: async (attendeeData, userId = 1) => {
     await new Promise(resolve => setTimeout(resolve, 300));
     const newAttendee = {
       ...attendeeData,
-      Id: Math.max(...mockAttendees.map(a => a.Id)) + 1
+      Id: Math.max(...mockAttendees.map(a => a.Id)) + 1,
+      createdBy: userId,
+      createdAt: new Date().toISOString()
     };
     mockAttendees.push(newAttendee);
     return { ...newAttendee };
   },
 
-  update: async (id, attendeeData) => {
+update: async (id, attendeeData, userId = 1) => {
     await new Promise(resolve => setTimeout(resolve, 300));
     const index = mockAttendees.findIndex(a => a.Id === id);
     if (index === -1) {
       throw new Error('Attendee not found');
     }
-    const updatedAttendee = { ...mockAttendees[index], ...attendeeData, Id: id };
+    const updatedAttendee = { 
+      ...mockAttendees[index], 
+      ...attendeeData, 
+      Id: id,
+      updatedBy: userId,
+      updatedAt: new Date().toISOString()
+    };
     mockAttendees[index] = updatedAttendee;
     return { ...updatedAttendee };
   },

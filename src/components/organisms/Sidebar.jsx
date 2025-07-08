@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useUser } from '@/contexts/UserContext';
 import ApperIcon from '@/components/ApperIcon';
+import Badge from '@/components/atoms/Badge';
 
 const Sidebar = () => {
+  const { user, canAccessEvents } = useUser();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const navigationItems = [
+const navigationItems = [
     { path: '/', label: 'Dashboard', icon: 'BarChart3' },
-    { path: '/events', label: 'Events', icon: 'Calendar' },
+    ...(canAccessEvents() ? [{ path: '/events', label: 'Events', icon: 'Calendar' }] : []),
     { path: '/settings', label: 'Settings', icon: 'Settings' }
   ];
 
@@ -49,14 +52,27 @@ const Sidebar = () => {
         ))}
       </nav>
 
-      <div className="p-4 border-t border-gray-700">
+<div className="p-4 border-t border-gray-700">
         <div className="flex items-center space-x-3 text-sm text-gray-400">
           <div className="w-8 h-8 bg-gradient-to-r from-accent to-emerald-600 rounded-full flex items-center justify-center">
             <ApperIcon name="User" className="h-4 w-4 text-white" />
           </div>
-          <div>
-            <p className="font-medium text-gray-300">Event Manager</p>
-            <p className="text-xs">Single User Mode</p>
+          <div className="flex-1">
+            <p className="font-medium text-gray-300">{user?.name || 'Loading...'}</p>
+            <div className="flex items-center space-x-2">
+              {user?.role && (
+                <Badge 
+                  className="text-xs px-2 py-0.5" 
+                  style={{ 
+                    backgroundColor: user.role.color + '20', 
+                    color: user.role.color,
+                    border: `1px solid ${user.role.color}40`
+                  }}
+                >
+                  {user.role.name}
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
       </div>

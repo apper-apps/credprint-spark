@@ -1,0 +1,53 @@
+[
+  {
+    "Id": 1,
+    "name": "System Administrator",
+    "email": "admin@credprint.com",
+    "avatar": "",
+    "roleId": 1,
+    "role": {
+      "Id": 1,
+      "name": "Administrator",
+      "permissions": ["*"],
+      "description": "Full system access"
+    },
+    "status": "active",
+    "lastLogin": "2024-01-20T10:30:00Z",
+    "createdAt": "2024-01-01T00:00:00Z",
+    "createdBy": 1
+  },
+  {
+    "Id": 2,
+    "name": "Event Manager",
+    "email": "manager@credprint.com",
+    "avatar": "",
+    "roleId": 2,
+    "role": {
+      "Id": 2,
+      "name": "Event Manager",
+      "permissions": ["events:read", "events:write", "attendees:read", "attendees:write", "templates:read", "templates:write"],
+      "description": "Manage events, attendees, and templates"
+    },
+    "status": "active",
+    "lastLogin": "2024-01-19T14:20:00Z",
+    "createdAt": "2024-01-05T09:00:00Z",
+    "createdBy": 1
+  },
+  {
+    "Id": 3,
+    "name": "Event Viewer",
+    "email": "viewer@credprint.com",
+    "avatar": "",
+    "roleId": 3,
+    "role": {
+      "Id": 3,
+      "name": "Viewer",
+      "permissions": ["events:read", "attendees:read", "templates:read"],
+      "description": "View-only access to events and attendees"
+    },
+    "status": "active",
+    "lastLogin": "2024-01-18T16:45:00Z",
+    "createdAt": "2024-01-10T11:30:00Z",
+    "createdBy": 1
+  }
+]

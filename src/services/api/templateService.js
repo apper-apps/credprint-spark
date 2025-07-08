@@ -15,23 +15,31 @@ const templateService = {
     return { ...template };
   },
 
-  create: async (templateData) => {
+create: async (templateData, userId = 1) => {
     await new Promise(resolve => setTimeout(resolve, 300));
     const newTemplate = {
       ...templateData,
-      Id: Math.max(...mockTemplates.map(t => t.Id)) + 1
+      Id: Math.max(...mockTemplates.map(t => t.Id)) + 1,
+      createdBy: userId,
+      createdAt: new Date().toISOString()
     };
     mockTemplates.push(newTemplate);
     return { ...newTemplate };
   },
 
-  update: async (id, templateData) => {
+update: async (id, templateData, userId = 1) => {
     await new Promise(resolve => setTimeout(resolve, 300));
     const index = mockTemplates.findIndex(t => t.Id === id);
     if (index === -1) {
       throw new Error('Template not found');
     }
-    const updatedTemplate = { ...mockTemplates[index], ...templateData, Id: id };
+    const updatedTemplate = { 
+      ...mockTemplates[index], 
+      ...templateData, 
+      Id: id,
+      updatedBy: userId,
+      updatedAt: new Date().toISOString()
+    };
     mockTemplates[index] = updatedTemplate;
     return { ...updatedTemplate };
   },

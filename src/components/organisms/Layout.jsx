@@ -1,7 +1,14 @@
+import { useUser } from '@/contexts/UserContext';
 import Sidebar from '@/components/organisms/Sidebar';
 import Header from '@/components/organisms/Header';
-
+import Loading from '@/components/ui/Loading';
 const Layout = ({ children }) => {
+  const { user, loading } = useUser();
+
+  if (loading) {
+    return <Loading />;
+  }
+
   return (
     <div className="min-h-screen bg-surface">
       <Sidebar />

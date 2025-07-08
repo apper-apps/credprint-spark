@@ -15,24 +15,32 @@ const eventService = {
     return { ...event };
   },
 
-  create: async (eventData) => {
+create: async (eventData, userId = 1) => {
     await new Promise(resolve => setTimeout(resolve, 300));
     const newEvent = {
       ...eventData,
       Id: Math.max(...mockEvents.map(e => e.Id)) + 1,
-      attendees: []
+      attendees: [],
+      createdBy: userId,
+      createdAt: new Date().toISOString()
     };
     mockEvents.push(newEvent);
     return { ...newEvent };
   },
 
-  update: async (id, eventData) => {
+update: async (id, eventData, userId = 1) => {
     await new Promise(resolve => setTimeout(resolve, 300));
     const index = mockEvents.findIndex(e => e.Id === id);
     if (index === -1) {
       throw new Error('Event not found');
     }
-    const updatedEvent = { ...mockEvents[index], ...eventData, Id: id };
+    const updatedEvent = { 
+      ...mockEvents[index], 
+      ...eventData, 
+      Id: id,
+      updatedBy: userId,
+      updatedAt: new Date().toISOString()
+    };
     mockEvents[index] = updatedEvent;
     return { ...updatedEvent };
   },
