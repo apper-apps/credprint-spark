@@ -1,29 +1,38 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import ApperIcon from '@/components/ApperIcon';
-import Button from '@/components/atoms/Button';
-import Card from '@/components/atoms/Card';
-import Badge from '@/components/atoms/Badge';
-import Loading from '@/components/ui/Loading';
-import Error from '@/components/ui/Error';
-import Empty from '@/components/ui/Empty';
-import EventCard from '@/components/organisms/EventCard';
-import eventService from '@/services/api/eventService';
-import { toast } from 'react-toastify';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { toast } from "react-toastify";
+import ApperIcon from "@/components/ApperIcon";
+import EventCard from "@/components/organisms/EventCard";
+import Badge from "@/components/atoms/Badge";
+import Button from "@/components/atoms/Button";
+import Card from "@/components/atoms/Card";
+import Empty from "@/components/ui/Empty";
+import Error from "@/components/ui/Error";
+import Loading from "@/components/ui/Loading";
+import Settings from "@/components/pages/Settings";
+import eventService from "@/services/api/eventService";
 
 const Dashboard = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const loadEvents = async () => {
+const loadEvents = async () => {
     try {
       setLoading(true);
       setError(null);
-      await new Promise(resolve => setTimeout(resolve, 300));
       const data = await eventService.getAll();
-      setEvents(data);
+      
+      // Parse event data from database
+      const parsedEvents = data.map(event => ({
+        ...event,
+        name: event.Name,
+        schema: typeof event.schema === 'string' ? JSON.parse(event.schema) : event.schema || {},
+        attendees: [] // Will be loaded separately if needed
+      }));
+      
+      setEvents(parsedEvents);
     } catch (err) {
       setError(err.message);
       toast.error('Failed to load events');
@@ -44,7 +53,7 @@ const Dashboard = () => {
       setEvents(events.filter(event => event.Id !== eventId));
       toast.success('Event deleted successfully');
     } catch (err) {
-      toast.error('Failed to delete event');
+toast.error('Failed to delete event');
     }
   };
 

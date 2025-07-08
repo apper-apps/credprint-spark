@@ -22,9 +22,12 @@ const AttendeeTable = ({ attendees, eventId, onDelete }) => {
 const sortedAttendees = [...attendees].sort((a, b) => {
     let aValue, bValue;
     
+    // Handle database field mapping
     if (sortField === 'name' || sortField === 'email') {
-      aValue = a.customData[sortField] || '';
-      bValue = b.customData[sortField] || '';
+      const customData = typeof a.custom_data === 'string' ? JSON.parse(a.custom_data) : a.custom_data || {};
+      const customDataB = typeof b.custom_data === 'string' ? JSON.parse(b.custom_data) : b.custom_data || {};
+      aValue = customData[sortField] || '';
+      bValue = customDataB[sortField] || '';
     } else {
       aValue = a[sortField] || '';
       bValue = b[sortField] || '';
@@ -96,10 +99,10 @@ const sortedAttendees = [...attendees].sort((a, b) => {
                 transition={{ delay: index * 0.1 }}
                 className="hover:bg-gray-50"
               >
-                <td className="px-6 py-4 whitespace-nowrap">
+<td className="px-6 py-4 whitespace-nowrap">
                   <div className="w-12 h-12 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center overflow-hidden">
-                    {attendee.photoUrl ? (
-                      <img src={attendee.photoUrl} alt="Attendee" className="w-full h-full object-cover" />
+                    {attendee.photo_url ? (
+                      <img src={attendee.photo_url} alt="Attendee" className="w-full h-full object-cover" />
                     ) : (
                       <ApperIcon name="User" className="h-6 w-6 text-gray-400" />
                     )}
@@ -107,16 +110,22 @@ const sortedAttendees = [...attendees].sort((a, b) => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
-                    {attendee.customData.name || 'No Name'}
+                    {(() => {
+                      const customData = typeof attendee.custom_data === 'string' ? JSON.parse(attendee.custom_data) : attendee.custom_data || {};
+                      return customData.name || attendee.Name || 'No Name';
+                    })()}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-600">
-                    {attendee.customData.email || 'No Email'}
+                    {(() => {
+                      const customData = typeof attendee.custom_data === 'string' ? JSON.parse(attendee.custom_data) : attendee.custom_data || {};
+                      return customData.email || 'No Email';
+                    })()}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <StatusBadge status={attendee.printStatus} />
+                  <StatusBadge status={attendee.print_status} />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex items-center space-x-2">
@@ -125,7 +134,7 @@ const sortedAttendees = [...attendees].sort((a, b) => {
                         <ApperIcon name="Edit" className="h-4 w-4" />
                       </Button>
                     </Link>
-<Button 
+                    <Button 
                       variant="danger" 
                       size="sm"
                       onClick={() => {

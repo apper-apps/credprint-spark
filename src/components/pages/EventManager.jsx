@@ -31,14 +31,22 @@ const EventManager = () => {
     }
   });
 
-  const loadEvents = async () => {
+const loadEvents = async () => {
     try {
       setLoading(true);
       setError(null);
-      await new Promise(resolve => setTimeout(resolve, 300));
       const data = await eventService.getAll();
-      setEvents(data);
-      setFilteredEvents(data);
+      
+      // Parse event data from database
+      const parsedEvents = data.map(event => ({
+        ...event,
+        name: event.Name,
+        schema: typeof event.schema === 'string' ? JSON.parse(event.schema) : event.schema || {},
+        attendees: [] // Will be loaded separately if needed
+      }));
+      
+      setEvents(parsedEvents);
+      setFilteredEvents(parsedEvents);
     } catch (err) {
       setError(err.message);
       toast.error('Failed to load events');
@@ -69,7 +77,15 @@ const EventManager = () => {
       };
       
       const createdEvent = await eventService.create(eventData);
-      setEvents([createdEvent, ...events]);
+      
+      // Parse the created event data
+      const parsedEvent = {
+        ...createdEvent,
+        name: createdEvent.Name,
+        schema: typeof createdEvent.schema === 'string' ? JSON.parse(createdEvent.schema) : createdEvent.schema || {}
+      };
+      
+      setEvents([parsedEvent, ...events]);
       setNewEvent({
         name: '',
         date: '',

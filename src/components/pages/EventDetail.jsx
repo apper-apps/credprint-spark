@@ -26,22 +26,29 @@ const EventDetail = () => {
     customData: {}
   });
 
-  const loadData = async () => {
+const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
-      await new Promise(resolve => setTimeout(resolve, 300));
       const [eventData, attendeeData] = await Promise.all([
         eventService.getById(parseInt(id)),
         attendeeService.getByEventId(parseInt(id))
       ]);
-      setEvent(eventData);
+      
+      // Parse event data from database
+      const parsedEvent = {
+        ...eventData,
+        name: eventData.Name,
+        schema: typeof eventData.schema === 'string' ? JSON.parse(eventData.schema) : eventData.schema || {}
+      };
+      
+      setEvent(parsedEvent);
       setAttendees(attendeeData);
       
       // Initialize form with event schema
-      if (eventData?.schema) {
+      if (parsedEvent?.schema) {
         const initialData = {};
-        Object.keys(eventData.schema).forEach(key => {
+        Object.keys(parsedEvent.schema).forEach(key => {
           initialData[key] = '';
         });
         setNewAttendee({ customData: initialData });
@@ -58,7 +65,7 @@ const EventDetail = () => {
     loadData();
   }, [id]);
 
-const handleAddAttendee = async (e) => {
+  const handleAddAttendee = async (e) => {
     e.preventDefault();
     
     // Validate required fields
@@ -100,7 +107,7 @@ const handleAddAttendee = async (e) => {
     }
   };
 
-const handleDeleteAttendee = async (attendeeId) => {
+  const handleDeleteAttendee = async (attendeeId) => {
     if (!confirm('Are you sure you want to delete this attendee? This action cannot be undone.')) return;
     
     try {
@@ -112,7 +119,7 @@ const handleDeleteAttendee = async (attendeeId) => {
     }
   };
 
-const handleFieldChange = (fieldName, value) => {
+  const handleFieldChange = (fieldName, value) => {
     setNewAttendee(prev => ({
       ...prev,
       customData: {
@@ -139,7 +146,7 @@ const handleFieldChange = (fieldName, value) => {
               </Button>
             </Link>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">{event.name}</h1>
+<h1 className="text-3xl font-bold text-gray-900">{event.name}</h1>
           <div className="flex items-center space-x-4 text-gray-600 mt-1">
             <div className="flex items-center space-x-1">
               <ApperIcon name="Calendar" className="h-4 w-4" />
@@ -185,8 +192,8 @@ const handleFieldChange = (fieldName, value) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Printed</p>
-              <p className="text-3xl font-bold text-accent">
-                {attendees.filter(a => a.printStatus === 'printed').length}
+<p className="text-3xl font-bold text-accent">
+                {attendees.filter(a => (a.print_status || a.printStatus) === 'printed').length}
               </p>
             </div>
             <div className="bg-gradient-to-r from-accent/10 to-emerald-100 p-3 rounded-full">
@@ -199,8 +206,8 @@ const handleFieldChange = (fieldName, value) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Pending</p>
-              <p className="text-3xl font-bold text-warning">
-                {attendees.filter(a => a.printStatus === 'not-printed').length}
+<p className="text-3xl font-bold text-warning">
+                {attendees.filter(a => (a.print_status || a.printStatus) === 'not-printed').length}
               </p>
             </div>
             <div className="bg-gradient-to-r from-warning/10 to-yellow-100 p-3 rounded-full">

@@ -32,22 +32,29 @@ const TemplateDesigner = () => {
     }
   });
 
-  const loadData = async () => {
+const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
-      await new Promise(resolve => setTimeout(resolve, 300));
       const eventData = await eventService.getById(parseInt(eventId));
       setEvent(eventData);
       
-      if (eventData.templateId) {
-        const templateData = await templateService.getById(eventData.templateId);
+      if (eventData.template_id) {
+        const templateData = await templateService.getById(eventData.template_id);
         setTemplate(templateData);
-        setTemplateData(templateData);
+        
+        // Parse JSON fields from database
+        const parsedTemplate = {
+          ...templateData,
+          name: templateData.Name,
+          dimensions: typeof templateData.dimensions === 'string' ? JSON.parse(templateData.dimensions) : templateData.dimensions,
+          design: typeof templateData.design === 'string' ? JSON.parse(templateData.design) : templateData.design
+        };
+        setTemplateData(parsedTemplate);
       } else {
         setTemplateData({
           ...templateData,
-          name: `${eventData.name} Template`
+          name: `${eventData.Name} Template`
         });
       }
     } catch (err) {
@@ -71,7 +78,10 @@ const TemplateDesigner = () => {
         savedTemplate = await templateService.create(templateData);
         // Update event with template ID
         await eventService.update(parseInt(eventId), {
-          ...event,
+          name: event.Name,
+          date: event.date,
+          location: event.location,
+          schema: typeof event.schema === 'string' ? event.schema : JSON.stringify(event.schema),
           templateId: savedTemplate.Id
         });
       }
@@ -101,8 +111,8 @@ const TemplateDesigner = () => {
             </Link>
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Template Designer</h1>
-          <p className="text-gray-600 mt-1">
-            Design credential template for <span className="font-medium">{event.name}</span>
+<p className="text-gray-600 mt-1">
+            Design credential template for <span className="font-medium">{event.Name}</span>
           </p>
         </div>
         <div className="flex items-center space-x-4">
@@ -255,8 +265,8 @@ const TemplateDesigner = () => {
                       backgroundColor: templateData.design.headerColor,
                       height: '60px'
                     }}
-                  >
-                    {event.name}
+>
+                    {event.Name}
                   </div>
 
                   {/* Content Area */}

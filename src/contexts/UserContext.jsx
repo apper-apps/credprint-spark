@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import userService from '@/services/api/userService';
 import { toast } from 'react-toastify';
 
@@ -13,83 +14,8 @@ export const useUser = () => {
 };
 
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState([]);
-  const [roles, setRoles] = useState([]);
-
-  const loadCurrentUser = async () => {
-    try {
-      // Simulate getting current user (in real app, would check auth token)
-      const currentUserId = localStorage.getItem('currentUserId') || '1';
-      const userData = await userService.getById(parseInt(currentUserId));
-      setUser(userData);
-    } catch (error) {
-      console.error('Failed to load current user:', error);
-      // Default to admin user for demo
-      const defaultUser = await userService.getById(1);
-      setUser(defaultUser);
-      localStorage.setItem('currentUserId', '1');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadUsers = async () => {
-    try {
-      const usersData = await userService.getAll();
-      setUsers(usersData);
-    } catch (error) {
-      toast.error('Failed to load users');
-    }
-  };
-
-  const loadRoles = async () => {
-    try {
-      const rolesData = await userService.getRoles();
-      setRoles(rolesData);
-    } catch (error) {
-      toast.error('Failed to load roles');
-    }
-  };
-
-  const createUser = async (userData) => {
-    try {
-      const newUser = await userService.create(userData);
-      setUsers(prev => [...prev, newUser]);
-      toast.success('User created successfully');
-      return newUser;
-    } catch (error) {
-      toast.error('Failed to create user');
-      throw error;
-    }
-  };
-
-  const updateUser = async (id, userData) => {
-    try {
-      const updatedUser = await userService.update(id, userData);
-      setUsers(prev => prev.map(u => u.Id === id ? updatedUser : u));
-      if (user && user.Id === id) {
-        setUser(updatedUser);
-      }
-      toast.success('User updated successfully');
-      return updatedUser;
-    } catch (error) {
-      toast.error('Failed to update user');
-      throw error;
-    }
-  };
-
-  const deleteUser = async (id) => {
-    try {
-      await userService.delete(id);
-      setUsers(prev => prev.filter(u => u.Id !== id));
-      toast.success('User deleted successfully');
-    } catch (error) {
-      toast.error('Failed to delete user');
-      throw error;
-    }
-  };
+  // Get user from Redux instead of local state
+  const { user, isAuthenticated } = useSelector((state) => state.user);
 
   const hasPermission = (permission) => {
     if (!user || !user.role) return false;
@@ -108,23 +34,10 @@ export const UserProvider = ({ children }) => {
     return hasPermission('roles:write') || hasPermission('*');
   };
 
-  useEffect(() => {
-    loadCurrentUser();
-    loadUsers();
-    loadRoles();
-  }, []);
-
   const value = {
     user,
-    loading,
-    users,
-    roles,
-    setUser,
-    loadUsers,
-    loadRoles,
-    createUser,
-    updateUser,
-    deleteUser,
+    loading: false, // Handled by Redux now
+    isAuthenticated,
     hasPermission,
     canAccessEvents,
     canManageUsers,

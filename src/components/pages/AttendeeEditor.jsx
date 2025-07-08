@@ -20,17 +20,32 @@ const AttendeeEditor = () => {
   const [error, setError] = useState(null);
   const [photoFile, setPhotoFile] = useState(null);
 
-  const loadData = async () => {
+const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
-      await new Promise(resolve => setTimeout(resolve, 300));
       const [attendeeData, eventData] = await Promise.all([
         attendeeService.getById(parseInt(attendeeId)),
         eventService.getById(parseInt(eventId))
       ]);
-      setAttendee(attendeeData);
-      setEvent(eventData);
+      
+      // Parse custom data from database
+      const parsedAttendee = {
+        ...attendeeData,
+        customData: typeof attendeeData.custom_data === 'string' ? JSON.parse(attendeeData.custom_data) : attendeeData.custom_data || {},
+        photoUrl: attendeeData.photo_url,
+        printStatus: attendeeData.print_status
+      };
+      
+      // Parse event schema from database
+      const parsedEvent = {
+        ...eventData,
+        name: eventData.Name,
+        schema: typeof eventData.schema === 'string' ? JSON.parse(eventData.schema) : eventData.schema || {}
+      };
+      
+      setAttendee(parsedAttendee);
+      setEvent(parsedEvent);
     } catch (err) {
       setError(err.message);
       toast.error('Failed to load attendee details');
@@ -43,7 +58,7 @@ const AttendeeEditor = () => {
     loadData();
   }, [attendeeId, eventId]);
 
-const handleFieldChange = (fieldName, value) => {
+  const handleFieldChange = (fieldName, value) => {
     setAttendee(prev => ({
       ...prev,
       customData: {
@@ -53,7 +68,7 @@ const handleFieldChange = (fieldName, value) => {
     }));
   };
 
-const handlePhotoUpload = (e) => {
+  const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
       // Validate file type
@@ -81,7 +96,7 @@ const handlePhotoUpload = (e) => {
     }
   };
 
-const handleSave = async (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     
     // Validate required fields
@@ -99,7 +114,13 @@ const handleSave = async (e) => {
     }
     
     try {
-      const updatedAttendee = await attendeeService.update(attendee.Id, attendee);
+      const updatedAttendee = await attendeeService.update(attendee.Id, {
+        customData: attendee.customData,
+        photoUrl: attendee.photoUrl,
+        printStatus: attendee.printStatus,
+        eventId: parseInt(eventId)
+      });
+      
       setAttendee(updatedAttendee);
       toast.success('Attendee updated successfully');
       navigate(`/events/${eventId}`);
@@ -126,7 +147,7 @@ const handleSave = async (e) => {
             </Link>
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Edit Attendee</h1>
-          <p className="text-gray-600 mt-1">
+<p className="text-gray-600 mt-1">
             Editing attendee for <span className="font-medium">{event.name}</span>
           </p>
         </div>
@@ -217,8 +238,8 @@ const handleSave = async (e) => {
                   {attendee.printStatus.replace('-', ' ')}
                 </span>
               </div>
-              <p className="text-sm text-gray-600">
-                Last updated: {new Date(attendee.createdAt).toLocaleDateString()}
+<p className="text-sm text-gray-600">
+                Last updated: {new Date(attendee.created_at).toLocaleDateString()}
               </p>
             </div>
           </Card>

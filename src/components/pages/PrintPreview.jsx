@@ -23,23 +23,37 @@ const PrintPreview = () => {
   const [selectedAttendees, setSelectedAttendees] = useState([]);
   const [printing, setPrinting] = useState(false);
 
-  const loadData = async () => {
+const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
-      await new Promise(resolve => setTimeout(resolve, 300));
       
       const [eventData, attendeeData] = await Promise.all([
         eventService.getById(parseInt(eventId)),
         attendeeService.getByEventId(parseInt(eventId))
       ]);
       
-      setEvent(eventData);
+      // Parse event data from database
+      const parsedEvent = {
+        ...eventData,
+        name: eventData.Name
+      };
+      
+      setEvent(parsedEvent);
       setAttendees(attendeeData);
       
-      if (eventData.templateId) {
-        const templateData = await templateService.getById(eventData.templateId);
-        setTemplate(templateData);
+      if (eventData.template_id) {
+        const templateData = await templateService.getById(eventData.template_id);
+        
+        // Parse template data from database
+        const parsedTemplate = {
+          ...templateData,
+          name: templateData.Name,
+          dimensions: typeof templateData.dimensions === 'string' ? JSON.parse(templateData.dimensions) : templateData.dimensions,
+          design: typeof templateData.design === 'string' ? JSON.parse(templateData.design) : templateData.design
+        };
+        
+        setTemplate(parsedTemplate);
       }
     } catch (err) {
       setError(err.message);
@@ -77,13 +91,26 @@ const PrintPreview = () => {
 
     setPrinting(true);
     try {
-      // Simulate printing process
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Update print status for selected attendees using API
+      const updatePromises = selectedAttendees.map(async (attendeeId) => {
+        const attendee = attendees.find(a => a.Id === attendeeId);
+        if (attendee) {
+          const customData = typeof attendee.custom_data === 'string' ? JSON.parse(attendee.custom_data) : attendee.custom_data || {};
+          return await attendeeService.update(attendeeId, {
+            customData,
+            photoUrl: attendee.photo_url,
+            printStatus: 'printed',
+            eventId: parseInt(eventId)
+          });
+        }
+      });
       
-      // Update print status for selected attendees
+      await Promise.all(updatePromises);
+      
+      // Update local state
       const updatedAttendees = attendees.map(attendee => 
         selectedAttendees.includes(attendee.Id)
-          ? { ...attendee, printStatus: 'printed' }
+          ? { ...attendee, print_status: 'printed' }
           : attendee
       );
       
@@ -118,7 +145,7 @@ const PrintPreview = () => {
             </Link>
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Print Preview</h1>
-          <p className="text-gray-600 mt-1">
+<p className="text-gray-600 mt-1">
             Preview and print credentials for <span className="font-medium">{event.name}</span>
           </p>
         </div>
@@ -180,24 +207,30 @@ const PrintPreview = () => {
               }`}
               onClick={() => handleSelectAttendee(attendee.Id)}
             >
-              <div className="flex items-center space-x-3">
+<div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center overflow-hidden">
-                  {attendee.photoUrl ? (
-                    <img src={attendee.photoUrl} alt="Attendee" className="w-full h-full object-cover" />
+                  {attendee.photo_url ? (
+                    <img src={attendee.photo_url} alt="Attendee" className="w-full h-full object-cover" />
                   ) : (
                     <ApperIcon name="User" className="h-4 w-4 text-gray-400" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">
-                    {attendee.customData.name || 'No Name'}
+                    {(() => {
+                      const customData = typeof attendee.custom_data === 'string' ? JSON.parse(attendee.custom_data) : attendee.custom_data || {};
+                      return customData.name || attendee.Name || 'No Name';
+                    })()}
                   </p>
                   <p className="text-xs text-gray-500 truncate">
-                    {attendee.customData.email || 'No Email'}
+                    {(() => {
+                      const customData = typeof attendee.custom_data === 'string' ? JSON.parse(attendee.custom_data) : attendee.custom_data || {};
+                      return customData.email || 'No Email';
+                    })()}
                   </p>
                 </div>
                 <div className="flex items-center space-x-2">
-                  {attendee.printStatus === 'printed' && (
+                  {(attendee.print_status || attendee.printStatus) === 'printed' && (
                     <ApperIcon name="Check" className="h-4 w-4 text-success" />
                   )}
                   <input
