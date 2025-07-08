@@ -43,41 +43,68 @@ const AttendeeEditor = () => {
     loadData();
   }, [attendeeId, eventId]);
 
-  const handleFieldChange = (fieldName, value) => {
-    setAttendee({
-      ...attendee,
+const handleFieldChange = (fieldName, value) => {
+    setAttendee(prev => ({
+      ...prev,
       customData: {
-        ...attendee.customData,
+        ...prev.customData,
         [fieldName]: value
       }
-    });
+    }));
   };
 
-  const handlePhotoUpload = (e) => {
+const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select a valid image file');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image file size must be less than 5MB');
+        return;
+      }
+      
       setPhotoFile(file);
       // Create preview URL
       const reader = new FileReader();
       reader.onload = (e) => {
-        setAttendee({
-          ...attendee,
+        setAttendee(prev => ({
+          ...prev,
           photoUrl: e.target.result
-        });
+        }));
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleSave = async (e) => {
+const handleSave = async (e) => {
     e.preventDefault();
+    
+    // Validate required fields
+    const requiredFields = Object.entries(event.schema)
+      .filter(([_, config]) => config.required)
+      .map(([fieldName, _]) => fieldName);
+    
+    const missingFields = requiredFields.filter(field => 
+      !attendee.customData[field] || attendee.customData[field].trim() === ''
+    );
+    
+    if (missingFields.length > 0) {
+      toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
+      return;
+    }
+    
     try {
       const updatedAttendee = await attendeeService.update(attendee.Id, attendee);
       setAttendee(updatedAttendee);
       toast.success('Attendee updated successfully');
       navigate(`/events/${eventId}`);
     } catch (err) {
-      toast.error('Failed to update attendee');
+      toast.error('Failed to update attendee: ' + err.message);
     }
   };
 

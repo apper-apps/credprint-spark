@@ -19,14 +19,29 @@ const AttendeeTable = ({ attendees, eventId, onDelete }) => {
     }
   };
 
-  const sortedAttendees = [...attendees].sort((a, b) => {
-    let aValue = a.customData[sortField] || '';
-    let bValue = b.customData[sortField] || '';
+const sortedAttendees = [...attendees].sort((a, b) => {
+    let aValue, bValue;
     
-    if (sortDirection === 'asc') {
-      return aValue.localeCompare(bValue);
+    if (sortField === 'name' || sortField === 'email') {
+      aValue = a.customData[sortField] || '';
+      bValue = b.customData[sortField] || '';
     } else {
-      return bValue.localeCompare(aValue);
+      aValue = a[sortField] || '';
+      bValue = b[sortField] || '';
+    }
+    
+    // Handle string comparison
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      return sortDirection === 'asc' 
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    }
+    
+    // Handle other types (dates, numbers)
+    if (sortDirection === 'asc') {
+      return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+    } else {
+      return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
     }
   });
 
@@ -110,10 +125,14 @@ const AttendeeTable = ({ attendees, eventId, onDelete }) => {
                         <ApperIcon name="Edit" className="h-4 w-4" />
                       </Button>
                     </Link>
-                    <Button 
+<Button 
                       variant="danger" 
                       size="sm"
-                      onClick={() => onDelete(attendee.Id)}
+                      onClick={() => {
+                        if (confirm('Are you sure you want to delete this attendee? This action cannot be undone.')) {
+                          onDelete(attendee.Id);
+                        }
+                      }}
                     >
                       <ApperIcon name="Trash2" className="h-4 w-4" />
                     </Button>

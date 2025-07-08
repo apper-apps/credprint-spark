@@ -58,21 +58,36 @@ const EventDetail = () => {
     loadData();
   }, [id]);
 
-  const handleAddAttendee = async (e) => {
+const handleAddAttendee = async (e) => {
     e.preventDefault();
+    
+    // Validate required fields
+    const requiredFields = Object.entries(event.schema)
+      .filter(([_, config]) => config.required)
+      .map(([fieldName, _]) => fieldName);
+    
+    const missingFields = requiredFields.filter(field => 
+      !newAttendee.customData[field] || newAttendee.customData[field].trim() === ''
+    );
+    
+    if (missingFields.length > 0) {
+      toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
+      return;
+    }
+    
     try {
       const attendeeData = {
         eventId: parseInt(id),
-        customData: newAttendee.customData,
+        customData: { ...newAttendee.customData },
         photoUrl: '',
         printStatus: 'not-printed',
         createdAt: new Date().toISOString()
       };
       
       const createdAttendee = await attendeeService.create(attendeeData);
-      setAttendees([...attendees, createdAttendee]);
+      setAttendees(prev => [...prev, createdAttendee]);
       
-      // Reset form
+      // Reset form with fresh state
       const initialData = {};
       Object.keys(event.schema).forEach(key => {
         initialData[key] = '';
@@ -81,30 +96,30 @@ const EventDetail = () => {
       setShowAddForm(false);
       toast.success('Attendee added successfully');
     } catch (err) {
-      toast.error('Failed to add attendee');
+      toast.error('Failed to add attendee: ' + err.message);
     }
   };
 
-  const handleDeleteAttendee = async (attendeeId) => {
-    if (!confirm('Are you sure you want to delete this attendee?')) return;
+const handleDeleteAttendee = async (attendeeId) => {
+    if (!confirm('Are you sure you want to delete this attendee? This action cannot be undone.')) return;
     
     try {
       await attendeeService.delete(attendeeId);
-      setAttendees(attendees.filter(a => a.Id !== attendeeId));
+      setAttendees(prev => prev.filter(a => a.Id !== attendeeId));
       toast.success('Attendee deleted successfully');
     } catch (err) {
-      toast.error('Failed to delete attendee');
+      toast.error('Failed to delete attendee: ' + err.message);
     }
   };
 
-  const handleFieldChange = (fieldName, value) => {
-    setNewAttendee({
-      ...newAttendee,
+const handleFieldChange = (fieldName, value) => {
+    setNewAttendee(prev => ({
+      ...prev,
       customData: {
-        ...newAttendee.customData,
+        ...prev.customData,
         [fieldName]: value
       }
-    });
+    }));
   };
 
   if (loading) return <Loading />;
