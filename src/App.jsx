@@ -1,4 +1,5 @@
 import { createContext, useEffect, useState } from 'react';
+import { UserProvider } from '@/contexts/UserContext';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
@@ -169,8 +170,10 @@ function AppContent() {
 function App() {
   return (
     <Provider store={store}>
-      <Router>
-        <AppContent />
+<Router>
+        <UserProvider>
+          <AppContent />
+        </UserProvider>
       </Router>
     </Provider>
   );
