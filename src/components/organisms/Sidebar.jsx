@@ -13,9 +13,9 @@ const Sidebar = () => {
 const navigationItems = [
     { path: '/', label: 'Dashboard', icon: 'BarChart3' },
     ...(canAccessEvents() ? [{ path: '/events', label: 'Events', icon: 'Calendar' }] : []),
+    ...(user?.role?.permissions?.includes('*') || user?.role?.permissions?.includes('users:read') ? [{ path: '/users', label: 'User Management', icon: 'Users' }] : []),
     { path: '/settings', label: 'Settings', icon: 'Settings' }
   ];
-
   const SidebarContent = () => (
     <div className="h-full flex flex-col bg-gradient-to-b from-gray-900 to-gray-800 text-white">
       <div className="p-6 border-b border-gray-700">

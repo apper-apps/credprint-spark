@@ -1,25 +1,25 @@
-import { createContext, useEffect, useState } from 'react';
-import { UserProvider } from '@/contexts/UserContext';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import { ToastContainer } from 'react-toastify';
-import { store } from '@/store';
-import { useDispatch, useSelector } from 'react-redux';
-import { setUser, clearUser } from '@/store/userSlice';
-import Layout from '@/components/organisms/Layout';
-import Dashboard from '@/components/pages/Dashboard';
-import EventManager from '@/components/pages/EventManager';
-import EventDetail from '@/components/pages/EventDetail';
-import AttendeeEditor from '@/components/pages/AttendeeEditor';
-import TemplateDesigner from '@/components/pages/TemplateDesigner';
-import PrintPreview from '@/components/pages/PrintPreview';
-import Settings from '@/components/pages/Settings';
-import Login from '@/components/pages/Login';
-import Signup from '@/components/pages/Signup';
-import Callback from '@/components/pages/Callback';
-import ErrorPage from '@/components/pages/ErrorPage';
-import ResetPassword from '@/components/pages/ResetPassword';
-import PromptPassword from '@/components/pages/PromptPassword';
+import React, { createContext, useEffect, useState } from "react";
+import { Route, Router, Routes, useNavigate } from "react-router-dom";
+import { Provider, useDispatch, useSelector } from "react-redux";
+import { ToastContainer } from "react-toastify";
+import UserManagement from "@/components/pages/UserManagement";
+import { store } from "@/store/index";
+import { clearUser, setUser } from "@/store/userSlice";
+import Layout from "@/components/organisms/Layout";
+import ErrorPage from "@/components/pages/ErrorPage";
+import TemplateDesigner from "@/components/pages/TemplateDesigner";
+import Signup from "@/components/pages/Signup";
+import Login from "@/components/pages/Login";
+import AttendeeEditor from "@/components/pages/AttendeeEditor";
+import Settings from "@/components/pages/Settings";
+import PromptPassword from "@/components/pages/PromptPassword";
+import ResetPassword from "@/components/pages/ResetPassword";
+import EventDetail from "@/components/pages/EventDetail";
+import Dashboard from "@/components/pages/Dashboard";
+import EventManager from "@/components/pages/EventManager";
+import PrintPreview from "@/components/pages/PrintPreview";
+import Callback from "@/components/pages/Callback";
+import { UserProvider } from "@/contexts/UserContext";
 
 // Create auth context
 export const AuthContext = createContext(null);
@@ -126,44 +126,46 @@ function AppContent() {
   
   return (
     <AuthContext.Provider value={authMethods}>
-      <div className="min-h-screen bg-background">
-        {isAuthenticated ? (
-          <Layout>
+    <div className="min-h-screen bg-background">
+        {isAuthenticated ? <Layout>
             <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/events" element={<EventManager />} />
-              <Route path="/events/:id" element={<EventDetail />} />
-              <Route path="/events/:eventId/attendees/:attendeeId" element={<AttendeeEditor />} />
-              <Route path="/events/:eventId/template" element={<TemplateDesigner />} />
-              <Route path="/events/:eventId/print" element={<PrintPreview />} />
-              <Route path="/settings" element={<Settings />} />
-            </Routes>
-          </Layout>
-        ) : (
-          <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/events" element={<EventManager />} />
+                <Route path="/events/:id" element={<EventDetail />} />
+                <Route
+                    path="/events/:eventId/attendees/:attendeeId"
+                    element={<AttendeeEditor />} />
+                <Route
+                    path="/events/:eventId/attendees/:attendeeId"
+                    element={<AttendeeEditor />} />
+                <Route path="/events/:eventId/template" element={<TemplateDesigner />} />
+                <Route path="/events/:eventId/print" element={<PrintPreview />} />
+                <Route path="/users" element={<UserManagement />} />
+                <Route path="/settings" element={<Settings />} />
+            </Routes></Layout> : <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/callback" element={<Callback />} />
             <Route path="/error" element={<ErrorPage />} />
-            <Route path="/prompt-password/:appId/:emailAddress/:provider" element={<PromptPassword />} />
+            <Route
+                path="/prompt-password/:appId/:emailAddress/:provider"
+                element={<PromptPassword />} />
             <Route path="/reset-password/:appId/:fields" element={<ResetPassword />} />
             <Route path="*" element={<Login />} />
-          </Routes>
-        )}
+        </Routes>}
         <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
-      </div>
-    </AuthContext.Provider>
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light" />
+    </div>
+</AuthContext.Provider>
   );
 }
 
