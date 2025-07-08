@@ -1,22 +1,27 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { format } from 'date-fns';
-import { toast } from 'react-toastify';
-import userService from '@/services/api/userService';
-import { useUser } from '@/contexts/UserContext';
-import ApperIcon from '@/components/ApperIcon';
-import Button from '@/components/atoms/Button';
-import Card from '@/components/atoms/Card';
-import Input from '@/components/atoms/Input';
-import Select from '@/components/atoms/Select';
-import Label from '@/components/atoms/Label';
-import Badge from '@/components/atoms/Badge';
-import SearchBar from '@/components/molecules/SearchBar';
-import FormField from '@/components/molecules/FormField';
-import Loading from '@/components/ui/Loading';
-import Error from '@/components/ui/Error';
-import Empty from '@/components/ui/Empty';
-
+import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { format } from "date-fns";
+import { toast } from "react-toastify";
+import ApperIcon from "@/components/ApperIcon";
+import Badge from "@/components/atoms/Badge";
+import Select from "@/components/atoms/Select";
+import Label from "@/components/atoms/Label";
+import Button from "@/components/atoms/Button";
+import Card from "@/components/atoms/Card";
+import Input from "@/components/atoms/Input";
+import Empty from "@/components/ui/Empty";
+import Error from "@/components/ui/Error";
+import Loading from "@/components/ui/Loading";
+import Login from "@/components/pages/Login";
+import FormField from "@/components/molecules/FormField";
+import SearchBar from "@/components/molecules/SearchBar";
+import templatesData from "@/services/mockData/templates.json";
+import rolesData from "@/services/mockData/roles.json";
+import eventsData from "@/services/mockData/events.json";
+import usersData from "@/services/mockData/users.json";
+import attendeesData from "@/services/mockData/attendees.json";
+import userService from "@/services/api/userService";
+import { useUser } from "@/contexts/UserContext";
 const UserManagement = () => {
   const { user: currentUser } = useUser();
   const [users, setUsers] = useState([]);
@@ -69,19 +74,20 @@ const UserManagement = () => {
     }
   };
 
-  const loadRoles = async () => {
+const loadRoles = async () => {
     try {
+      setError(null);
       const roleData = await userService.getRoles();
       setRoles(roleData || []);
     } catch (err) {
       console.error('Error loading roles:', err);
+setError('Failed to load roles: ' + err.message);
     }
   };
 
   const handleSearch = (term) => {
     setSearchTerm(term);
   };
-
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email?.toLowerCase().includes(searchTerm.toLowerCase());
