@@ -771,11 +771,101 @@ const userService = {
       const permissions = Array.isArray(user.role.permissions) 
         ? user.role.permissions 
         : JSON.parse(user.role.permissions || '[]');
-      
-      return permissions.includes(permission) || permissions.includes('*');
+return permissions.includes(permission) || permissions.includes('*');
     } catch (error) {
       console.error("Error checking permission:", error);
       return false;
+    }
+  },
+
+  createSystemAdmin: async () => {
+    try {
+      const { ApperClient } = window.ApperSDK;
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      });
+      
+      // Check if admin already exists
+      const existingAdmin = await userService.getByEmail('admin@credprint.pro');
+      if (existingAdmin) {
+        console.log('System administrator already exists');
+        return existingAdmin;
+      }
+      
+      // Create system administrator user
+      const params = {
+        records: [{
+          Name: 'System Administrator',
+          firstName: 'System',
+          lastName: 'Administrator',
+          email: 'admin@credprint.pro',
+          isActive: true
+        }]
+      };
+      
+      const response = await apperClient.createRecord('app_User', params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+      
+      if (response.results) {
+        const successfulRecords = response.results.filter(result => result.success);
+        const failedRecords = response.results.filter(result => !result.success);
+        
+        if (failedRecords.length > 0) {
+          console.error(`Failed to create ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+          throw new Error(failedRecords[0].message || 'Failed to create system administrator');
+        }
+        
+        const newAdmin = successfulRecords[0].data;
+        
+        // Assign Administrator role (Id: 1) to the system admin
+        await userRoleService.create(newAdmin.Id, 1);
+        
+        // Get the Administrator role for complete user object
+        const roles = await roleService.getAll();
+        const adminRole = roles.find(r => r.Id === 1);
+        
+        const adminUser = {
+          ...newAdmin,
+          name: newAdmin.Name,
+          status: newAdmin.isActive ? 'active' : 'inactive',
+          role: adminRole || { Id: 1, name: 'Administrator', permissions: ['*'], color: '#ef4444' },
+          roleId: 1
+        };
+        
+        console.log('System administrator created successfully:', adminUser);
+        return adminUser;
+      }
+    } catch (error) {
+      console.error("Error creating system administrator:", error);
+      
+      // Fallback to mock data if database operation fails
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      const adminRole = mockRoles.find(r => r.Id === 1);
+      const newAdmin = {
+        Id: Math.max(...mockUsers.map(u => u.Id)) + 1,
+        name: 'System Administrator',
+        email: 'admin@credprint.pro',
+        role: adminRole || { Id: 1, name: 'Administrator', permissions: ['*'], color: '#ef4444' },
+        roleId: 1,
+        status: 'active',
+        createdAt: new Date().toISOString(),
+        createdBy: 1,
+        lastLogin: null
+      };
+      
+      // Check if admin already exists in mock data
+      const existingMockAdmin = mockUsers.find(u => u.email === 'admin@credprint.pro');
+      if (!existingMockAdmin) {
+        mockUsers.push(newAdmin);
+      }
+      
+      return existingMockAdmin || newAdmin;
     }
   }
 };
