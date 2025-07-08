@@ -8,28 +8,22 @@ import Card from "@/components/atoms/Card";
 import Error from "@/components/ui/Error";
 import FormField from "@/components/molecules/FormField";
 import SearchBar from "@/components/molecules/SearchBar";
-import SearchBar from "@/services/mockData/templates.json";
-import SearchBar from "@/services/mockData/roles.json";
-import SearchBar from "@/services/mockData/events.json";
-import SearchBar from "@/services/mockData/users.json";
-import SearchBar from "@/services/mockData/attendees.json";
+import templatesData from "@/services/mockData/templates.json";
+import rolesData from "@/services/mockData/roles.json";
+import eventsData from "@/services/mockData/events.json";
+import usersData from "@/services/mockData/users.json";
+import attendeesData from "@/services/mockData/attendees.json";
 import { useUser } from "@/contexts/UserContext";
 
 const Settings = () => {
-  const { user, users, roles, canManageUsers, canManageRoles, loadUsers, loadRoles, createUser, updateUser, deleteUser } = useUser();
+const { user, users, roles, canManageUsers, canManageRoles, loadUsers, loadRoles, createUser, updateUser, deleteUser } = useUser();
   const [activeTab, setActiveTab] = useState('general');
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showUserModal, setShowUserModal] = useState(false);
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
-  const [userForm, setUserForm] = useState({ name: '', email: '', roleId: '', status: 'active' });
-  const [roleForm, setRoleForm] = useState({ name: '', description: '', permissions: [], color: '#3b82f6' });
-  const [showUserModal, setShowUserModal] = useState(false);
-  const [showRoleModal, setShowRoleModal] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
   const [editingRole, setEditingRole] = useState(null);
-  
   const [settings, setSettings] = useState({
     general: {
       appName: 'CredPrint Pro',
@@ -50,7 +44,7 @@ const Settings = () => {
     }
   });
 
-  const [userForm, setUserForm] = useState({
+const [userForm, setUserForm] = useState({
     name: '',
     email: '',
     roleId: '',
@@ -78,13 +72,17 @@ const Settings = () => {
     { id: '*', label: 'Administrator (All Permissions)', category: 'System' }
   ];
 
-  useEffect(() => {
-    const filtered = users.filter(u => 
-      u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.role.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredUsers(filtered);
+useEffect(() => {
+    if (users && users.length > 0) {
+      const filtered = users.filter(u => 
+        u?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        u?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        u?.role?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredUsers(filtered);
+    } else {
+      setFilteredUsers([]);
+    }
   }, [users, searchTerm]);
 
   const tabs = [
@@ -137,8 +135,8 @@ const handleSaveSettings = () => {
 
   const handleUpdateUser = async (e) => {
     e.preventDefault();
-    try {
-      await updateUser(editingUser.Id, userForm);
+try {
+      await updateUser(editingUser?.Id, userForm);
       setShowUserModal(false);
       setEditingUser(null);
       setUserForm({ name: '', email: '', roleId: '', status: 'active' });
@@ -229,8 +227,8 @@ return (
       </div>
 
       {/* Tab Content */}
-      {activeTab === 'general' && (
-        <>
+{activeTab === 'general' && (
+        <div className="space-y-6">
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* General Settings */}
@@ -467,8 +465,8 @@ return (
               </div>
             </div>
           </Card>
-        </motion.div>
-        </>
+</motion.div>
+        </div>
       )}
 
       {/* Users Tab */}
@@ -493,9 +491,9 @@ return (
             placeholder="Search users..."
           />
 
-          {/* Users Grid */}
+{/* Users Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredUsers.map((userItem) => (
+            {filteredUsers && filteredUsers.length > 0 ? filteredUsers.map((userItem) => (
               <motion.div
                 key={userItem.Id}
                 initial={{ opacity: 0, y: 20 }}
@@ -557,8 +555,12 @@ return (
                     )}
                   </div>
                 </Card>
-              </motion.div>
-            ))}
+</motion.div>
+            )) : (
+              <div className="col-span-full text-center py-8">
+                <p className="text-gray-500">No users found</p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -578,9 +580,9 @@ return (
             </Button>
           </div>
 
-          {/* Roles Grid */}
+{/* Roles Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {roles.map((role) => (
+            {roles && roles.length > 0 ? roles.map((role) => (
               <motion.div
                 key={role.Id}
                 initial={{ opacity: 0, y: 20 }}
@@ -645,8 +647,12 @@ return (
                     )}
                   </div>
                 </Card>
-              </motion.div>
-            ))}
+</motion.div>
+            )) : (
+              <div className="col-span-full text-center py-8">
+                <p className="text-gray-500">No roles found</p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -689,8 +695,8 @@ return (
                   label="Role"
                   type="select"
                   value={userForm.roleId}
-                  onChange={(e) => setUserForm({...userForm, roleId: parseInt(e.target.value)})}
-                  options={roles.map(role => ({ value: role.Id, label: role.name }))}
+onChange={(e) => setUserForm({...userForm, roleId: parseInt(e.target.value)})}
+                  options={roles && roles.length > 0 ? roles.map(role => ({ value: role.Id, label: role.name })) : []}
                   required
                 />
 
