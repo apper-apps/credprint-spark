@@ -1,0 +1,92 @@
+[
+  {
+    "Id": 1,
+    "name": "Tech Conference 2024",
+    "date": "2024-03-15",
+    "location": "San Francisco Convention Center",
+    "schema": {
+      "name": {
+        "type": "text",
+        "required": true,
+        "label": "Full Name"
+      },
+      "email": {
+        "type": "email",
+        "required": true,
+        "label": "Email Address"
+      },
+      "company": {
+        "type": "text",
+        "required": false,
+        "label": "Company"
+      },
+      "title": {
+        "type": "text",
+        "required": false,
+        "label": "Job Title"
+      }
+    },
+    "templateId": 1,
+    "createdAt": "2024-01-15T10:00:00Z"
+  },
+  {
+    "Id": 2,
+    "name": "Annual Sales Summit",
+    "date": "2024-04-20",
+    "location": "New York Marriott",
+    "schema": {
+      "name": {
+        "type": "text",
+        "required": true,
+        "label": "Full Name"
+      },
+      "email": {
+        "type": "email",
+        "required": true,
+        "label": "Email Address"
+      },
+      "company": {
+        "type": "text",
+        "required": true,
+        "label": "Company"
+      },
+      "region": {
+        "type": "text",
+        "required": false,
+        "label": "Sales Region"
+      }
+    },
+    "templateId": 2,
+    "createdAt": "2024-01-20T14:30:00Z"
+  },
+  {
+    "Id": 3,
+    "name": "Healthcare Innovation Forum",
+    "date": "2024-05-10",
+    "location": "Boston Medical Center",
+    "schema": {
+      "name": {
+        "type": "text",
+        "required": true,
+        "label": "Full Name"
+      },
+      "email": {
+        "type": "email",
+        "required": true,
+        "label": "Email Address"
+      },
+      "organization": {
+        "type": "text",
+        "required": true,
+        "label": "Organization"
+      },
+      "specialty": {
+        "type": "text",
+        "required": false,
+        "label": "Medical Specialty"
+      }
+    },
+    "templateId": null,
+    "createdAt": "2024-02-01T09:15:00Z"
+  }
+]

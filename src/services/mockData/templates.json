@@ -1,0 +1,44 @@
+[
+  {
+    "Id": 1,
+    "name": "Tech Conference Template",
+    "dimensions": {
+      "width": 400,
+      "height": 250
+    },
+    "design": {
+      "backgroundColor": "#ffffff",
+      "headerColor": "#2563eb",
+      "textColor": "#1f2937",
+      "accentColor": "#10b981"
+    }
+  },
+  {
+    "Id": 2,
+    "name": "Sales Summit Template",
+    "dimensions": {
+      "width": 450,
+      "height": 280
+    },
+    "design": {
+      "backgroundColor": "#f8fafc",
+      "headerColor": "#059669",
+      "textColor": "#374151",
+      "accentColor": "#3b82f6"
+    }
+  },
+  {
+    "Id": 3,
+    "name": "Healthcare Forum Template",
+    "dimensions": {
+      "width": 420,
+      "height": 260
+    },
+    "design": {
+      "backgroundColor": "#ffffff",
+      "headerColor": "#dc2626",
+      "textColor": "#1f2937",
+      "accentColor": "#f59e0b"
+    }
+  }
+]
